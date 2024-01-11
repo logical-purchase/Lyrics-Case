@@ -2,16 +2,36 @@
 
 <?= $this->section('content'); ?>
 
-<div class="container my-3">
+<div class="container mt-4 mb-2">
     <?php foreach ($songs as $song) : ?>
-        <a class="text-decoration-none text-info-emphasis" href="<?= base_url('songs/' . esc($song['song_id'])); ?>">
-            <div class="bg-body rounded-4 shadow-sm fw-medium px-3 mb-2 p-2">
-                <div class="row g-3">
-                    <div class="col-auto">
-                        <img src="<?= esc($song['song_artwork']); ?>" width="50px">
+        <a class="link-body-emphasis text-decoration-none" href="<?= base_url('songs/' . esc($song['song_id'])); ?>">
+            <div class="song-item d-flex bg-body text-truncate rounded-3 shadow-sm mb-3">
+                <div class="row g-0 w-100">
+                    <div class="col-auto p-2">
+                        <img src="<?= esc($song['song_artwork']); ?>" width="63px">
                     </div>
-                    <div class="col d-flex align-items-center">
-                        <span><?= esc($song['artist_names']); ?> - <?= esc($song['song_title']); ?> lyrics</span>
+                    <div class="col text-truncate p-2 ps-0">
+                        <small>
+                            <div class="row">
+                                <div class="col text-truncate">
+                                    <span class="h6">
+                                        <?= esc($song['song_title']); ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-truncate">
+                                    <span>
+                                        <?= esc($song['artist_names']); ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <span><i class="bi bi-eye me-1"></i><?= esc($song['song_views']); ?></span>
+                                </div>
+                            </div>
+                        </small>
                     </div>
                 </div>
             </div>

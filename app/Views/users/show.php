@@ -29,35 +29,26 @@
                         <h4 class="me-2 mb-0">@<?= $user['username'] ?></h4>
                         <span class="badge text-bg-primary"><?= $user['user_points'] ?></span>
                     </div>
-                    <?php if ($userRoles) : ?>
-                        <div class="dropdown text-center">
-                            <span class="dropdown-toggle text-info-emphasis fw-medium" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                <?php if (!empty($userRoles)) : ?>
-                                    <?= esc($userRoles[0]['role_name']); ?>
-                                <?php else : ?>
-                                    No roles
-                                <?php endif; ?>
-                            </span>
-                            <ul class="dropdown-menu">
-                                <?php foreach ($userRoles as $userRole) : ?>
-                                    <li class="dropdown-item-text fw-medium"><?= esc($userRole['role_name']); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endif ?>
+
+                    <div class="dropdown text-center">
+                        <span class="fw-medium">
+                            <?= $user['role_name'] ?>
+                        </span>
+                    </div>
+
                 </div>
 
                 <?php if (session()->has('loggedUser')) : ?>
                     <div class="edit-info text-center mt-3">
                         <?php if ($userInfo['user_id'] === $user['user_id']) : ?>
-                            <button type="button" class="btn btn-primary rounded-pill shadow-sm fw-medium px-3">
+                            <button type="button" class="btn btn-primary fw-medium">
                                 <i class="bi bi-pencil me-2"></i>Edit profile
                             </button>
                         <?php endif ?>
                     </div>
                 <?php endif ?>
 
-                <div class="bg-body rounded-3 p-4 mt-3">
+                <div class="bg-body rounded-3 shadow-sm p-4 mt-3">
                     <?php if ($user['user_bio']) : ?>
                         <p class="mb-0"><?= $user['user_bio'] ?></p>
                     <?php else : ?>
@@ -68,47 +59,47 @@
 
             <?php if (session()->has('loggedUser')) : ?>
                 <div class="manage-role mb-4">
-                    <span class="h6 text-info-emphasis text-uppercase user-select-none">Manage roles</span>
-                    <div class="bg-body rounded-3 mt-2 p-4 fw-medium">
-
-                        <?php foreach ($roles as $role) : ?>
-                            <?php $userHasRole = false; ?>
-                            <?php foreach ($userRoles as $userRole) : ?>
-                                <?php if ($userRole['role_name'] === $role['role_name']) : ?>
-                                    <?php
-                                    $createdAt = new \CodeIgniter\I18n\Time($userRole['ur_created_at']);
-                                    $formattedCreatedAt = $createdAt->format('M d, Y h:i:s A');
-                                    ?>
-                                    <?php $userHasRole = true; ?>
-                                    <div class="role-info mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <p class="mb-0"><?= esc($role['role_name']); ?></p>
-                                            <button type="button" class="btn btn-outline-primary rounded-pill fw-medium text-start ms-auto px-3" data-bs-toggle="modal" data-bs-target="#removeRoleModal">
-                                                Remove role
-                                            </button>
-                                        </div>
-                                        <p class="fw-normal mt-1 mb-0"><a href="<?= base_url($userRole['granter']); ?>"><?= esc($userRole['granter']); ?></a> granted <?= esc($user['username']); ?> the <?= esc($role['role_name']); ?> role at <?= $formattedCreatedAt; ?>.</p>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-
-                            <?php if (!$userHasRole) : ?>
-                                <button type="button" class="btn btn-primary rounded-pill fw-medium mb-3 w-100" data-bs-toggle="modal" data-bs-target="#grantRoleModal" data-role-id="<?= esc($role['role_id']); ?>">
-                                    Grant <?= esc($user['username']); ?> the <?= esc($role['role_name']); ?> role
-                                </button>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-
+                    <span class="h6 text-info-emphasis text-uppercase user-select-none">Edit role</span>
+                    <div class="bg-body rounded-3 shadow-sm mt-2 p-4">
+                        <form action="<?= base_url('updaterole/') . $user['user_id']; ?>" method="post">
+                            <label for="role-select" class="mb-2">Current role</label>
+                            <select name="role" id="role-select" class="form-select mb-3">
+                                <?php foreach ($roles as $role) : ?>
+                                    <?php if ($role['role_id'] != 1) : ?>
+                                        <option value="<?= $role['role_id'] ?>" <?= ($role['role_id'] == $user['id_role']) ? 'selected' : ''; ?>>
+                                            <?= $role['role_name']; ?>
+                                        </option>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" class="btn btn-primary fw-medium">Assign role</button>
+                        </form>
                     </div>
                 </div>
 
                 <?php if ($userInfo['user_id'] != $user['user_id']) : ?>
-                    <div class="moderation mb-4">
-                        <span class="h6 text-info-emphasis text-uppercase">Moderation</span>
-                        <div class="bg-white rounded-3 p-4 mt-2 fw-medium">
-                            <a class="link-danger text-uppercase text-decoration-none" href=""><i class="bi bi-exclamation-triangle me-1"></i>Ban @<?= $user['username'] ?></a>
+                    <?php if ($userInfo['id_role'] == 5) : ?>
+                        <div class="moderation mb-4">
+                            <span class="h6 text-info-emphasis text-uppercase">Moderation</span>
+                            <div class="bg-white rounded-3 p-4 mt-2">
+                                <?php if ($user['user_status'] == 1) : ?>
+                                    <form action="<?= base_url('moderate/') . $user['user_id'] ?>" method="post">
+                                        <button type="submit" class="btn btn-link link-danger text-uppercase text-decoration-none fw-medium">
+                                            <input type="hidden" name="status" value="0">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Deactivate @<?= $user['username'] ?>
+                                        </button>
+                                    </form>
+                                <?php else : ?>
+                                    <form action="<?= base_url('moderate/') . $user['user_id'] ?>" method="post">
+                                        <button type="submit" class="btn btn-link link-danger text-uppercase text-decoration-none fw-medium">
+                                            <input type="hidden" name="status" value="1">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Activate @<?= $user['username'] ?>
+                                        </button>
+                                    </form>
+                                <?php endif ?>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif ?>
                 <?php endif ?>
             <?php endif ?>
         </div>

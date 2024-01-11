@@ -12,6 +12,7 @@ class SongController extends ResourceController
     public function __construct()
     {
         $this->songModel = new SongModel();
+        helper('access_role');
     }
 
     /**
@@ -21,13 +22,21 @@ class SongController extends ResourceController
      */
     public function index()
     {
-        $songData['songs'] = $this->songModel->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
-            ->join('song_artists', 'song_artists.id_song = songs.song_id')
-            ->join('artists', 'artists.artist_id = song_artists.id_artist')
-            ->groupBy('songs.song_id')
-            ->findAll();
+        try {
+            if (!validateAccess(array('Staff', 'Moderator'), $this->request->getServer('HTTP_AUTHORIZATION')))
+                return $this->failForbidden('The role does not have access to this resource');
 
-        return $this->respond($songData);
+            $songs['songs'] = $this->songModel->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
+                ->join('song_artists', 'song_artists.id_song = songs.song_id')
+                ->join('artists', 'artists.artist_id = song_artists.id_artist')
+                ->groupBy('songs.song_id')
+                ->orderBy('songs.song_created_at', 'DESC')
+                ->findAll();
+
+            return $this->respond($songs);
+        } catch (\Exception $e) {
+            return $this->failServerError('An error has occurred on the server');
+        }
     }
 
     /**
@@ -50,6 +59,28 @@ class SongController extends ResourceController
             return $this->respond($song);
         } else {
             return $this->failNotFound('Song not found');
+        }
+    }
+
+    public function search($term = null)
+    {
+        if ($term === null) {
+            return $this->fail('Search term is required', 400);
+        }
+
+        $songData['songs'] = $this->songModel
+            ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
+            ->join('song_artists', 'song_artists.id_song = songs.song_id')
+            ->join('artists', 'artists.artist_id = song_artists.id_artist')
+            ->like('songs.song_title', $term)
+            ->orLike('artists.artist_name', $term)
+            ->groupBy('songs.song_id')
+            ->findAll();
+
+        if ($songData['songs']) {
+            return $this->respond($songData);
+        } else {
+            return $this->failNotFound('No matching songs found');
         }
     }
 
@@ -80,7 +111,19 @@ class SongController extends ResourceController
      */
     public function edit($id = null)
     {
-        //
+        $song['song'] = $this->songModel->find($id);
+
+        $song['song'] = $this->songModel
+            ->select('song_lyrics')
+            ->where(['song_id' => $id])
+            ->get()
+            ->getRow();
+
+        if ($song['song'] != null) {
+            return $this->respond($song);
+        } 
+
+        return $this->failNotFound('Song not found');
     }
 
     /**
@@ -90,21 +133,31 @@ class SongController extends ResourceController
      */
     public function update($id = null)
     {
-        $requestData = $this->request->getJSON();
+        try {
+            if (!validateAccess(array('Staff', 'Moderator', 'Editor'), $this->request->getServer('HTTP_AUTHORIZATION')))
+                return $this->failForbidden('The role does not have access to this resource'); //403
 
-        $updateData = [
-            'song_lyrics' => $requestData->song_lyrics
-        ];
+            if ($this->songModel->find($id)) {
+                $requestData = $this->request->getJSON();
 
-        $this->songModel->update($id, $updateData);
+                $updateData = [
+                    'song_lyrics' => $requestData->song_lyrics
+                ];
+    
+                $this->songModel->update($id, $updateData);
+    
+                $response = [
+                    'status' => 200,
+                    'error' => null,
+                    'message' => ['successfull' => 'Lyrics updated successfully']
+                ];
 
-        $response = [
-            'status' => 200,
-            'error' => null,
-            'message' => ['successfull' => 'Song updated successfully']
-        ];
-
-        return $this->respond($response);
+                return $this->respond($response);
+            }
+            return $this->failNotFound('Song not found');
+        } catch (\Exception $e) {
+            return $this->failServerError('An error has occurred on the server');
+        }
     }
 
     /**

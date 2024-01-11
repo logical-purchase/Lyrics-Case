@@ -19,6 +19,11 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
+    public static function getSecretKey()
+    {
+        return getenv('JWT_SECRET_KEY');
+    }
+    
     /*
      * public static function example($getShared = true)
      * {

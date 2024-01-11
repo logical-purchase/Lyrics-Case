@@ -30,7 +30,7 @@ class ArtistController extends BaseController
         $artist = $this->artistModel->find($id);
 
         if ($artist) {
-            
+
             $title = "{$artist['artist_name']} on Lyrics Case";
             $data = [
                 'title'      => $title,
@@ -46,16 +46,19 @@ class ArtistController extends BaseController
 
     public function getArtists()
     {
-        // Lógica para obtener datos de artistas desde la base de datos
-        $artists = $this->artistModel->findAll();
+        $searchTerm = $this->request->getGet('q');
 
-        // Formatear datos en formato JSON para Select2
+        $artists = $this->artistModel->like('artist_name', $searchTerm)->findAll();
+
         $data = [];
         foreach ($artists as $artist) {
-            $data[] = ['id' => $artist['artist_id'], 'text' => $artist['artist_name']];
+            $data[] = [
+                'id' => $artist['artist_id'],
+                'text' => $artist['artist_name'],
+                'image' => $artist['artist_image'],
+            ];
         }
 
-        // Enviar datos en formato JSON
         return $this->response->setJSON($data);
     }
 

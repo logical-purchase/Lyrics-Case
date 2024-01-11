@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Models\ActivityModel;
 use App\Models\RoleModel;
 use App\Models\UserModel;
-use App\Models\UserRoleModel;
 
 class UserController extends BaseController
 {
@@ -20,30 +19,20 @@ class UserController extends BaseController
         $this->activityModel = new ActivityModel();
         $this->roleModel     = new RoleModel();
         $this->userModel     = new UserModel();
-        $this->userRoleModel = new UserRoleModel();
-    }
-
-    public function index()
-    {
     }
 
     public function show($username = null)
     {
         $userInfo = $this->getLoggedUserInfo();
 
-        //$user = $this->userModel->find($id);
-        $user = $this->userModel->where('username', $username)->first();
+        $user = $this->userModel
+            ->select('users.*, roles.role_name')
+            ->join('roles', 'roles.role_id = users.id_role')
+            ->where('username', $username)
+            ->first();
 
         if ($user) {
             $roles = $this->roleModel->findAll();
-
-            $userRoles = $this->userRoleModel
-                ->select('roles.role_id, roles.role_name, users.username as granter, user_roles.ur_created_at')
-                ->join('roles', 'roles.role_id = user_roles.id_role')
-                ->join('users', 'users.user_id = user_roles.ur_granter')
-                ->where('id_user', $user['user_id'])
-                ->orderBy('roles.role_id', 'DESC')
-                ->findAll();
 
             $activities = $this->activityModel
                 ->select('activities.*, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') AS artist_names')
@@ -55,66 +44,38 @@ class UserController extends BaseController
                 ->orderBy('activity_created_at', 'DESC')
                 ->findAll();
 
-
             $title = "@{$user['username']} - Lyrics Case";
             $data = [
                 'title'      => $title,
                 'userInfo'   => $userInfo,
                 'user'       => $user,
-                'userRoles'  => $userRoles,
                 'roles'      => $roles,
                 'activities' => $activities
             ];
 
             return view('users/show', $data);
         } else {
-            //return redirect()->to('/songs')->with('fail', 'User not found');
-            //return view('errors/html/error_404');
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
-    }
-
-    public function new()
-    {
-    }
-
-    public function create()
-    {
-    }
-
-    public function edit($id = null)
-    {
     }
 
     public function update($id = null)
     {
     }
 
-    public function delete($id = null)
+    public function updateRole($id = null)
     {
+        $this->userModel->update($id, ['id_role' => $this->request->getPost('role')]);
+
+        return redirect()->back()->with('success', 'Role updated successfully');
     }
 
-    public function promote()
+    public function moderate($id = null)
     {
-        $userId = $this->request->getPost('user_id');
-        $roleId = $this->request->getPost('role_id');
-        $granterId = $this->request->getPost('granter_id');
+        $this->userModel->update($id, ['user_status' => $this->request->getPost('status')]);
 
-        // Realiza la inserción en la tabla user_roles
-        $data = [
-            'id_user' => $userId,
-            'id_role' => $roleId,
-            'ur_granter' => $granterId
-        ];
-
-        $this->userRoleModel->insert($data);
-
-        // Puedes agregar lógica adicional aquí, como redirecciones o mensajes flash
-
-        // Redirige a la página que desees después de realizar la promoción
-        return redirect()->back()->with('success', 'User promoted successfully');
+        return redirect()->back()->with('success', 'Status updated successfully');
     }
-
 
     private function getLoggedUserInfo()
     {

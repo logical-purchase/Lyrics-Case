@@ -7,8 +7,25 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+// Rutas API Rest
+$routes->group('api/v1', ['namespace' => 'App\Controllers\Api'], function ($routes) {
+    // SONGS
+    $routes->post('auth/login', 'Auth::login');
+    $routes->get('songs', 'SongController::index');
+    $routes->get('songs/(:num)', 'SongController::show/$1');
+    $routes->get('songs/edit/(:num)', 'SongController::edit/$1');
+    $routes->put('songs/update/(:num)', 'SongController::update/$1', ['filter' => 'AuthFilter']);
+    $routes->get('search/(:any)', 'SongController::search/$1');
+
+    // USERS
+    $routes->get('user/(:segment)', 'UserController::show/$1');
+});
+
+
 $routes->group('', ['filter' => 'AuthCheck'], function ($routes) {
     $routes->get('new', 'SongController::new');
+    $routes->get('settings', 'SettingController::index');
+    $routes->get('test', 'Home::test');
 });
 
 $routes->group('', ['filter' => 'AlreadyLoggedIn'], function ($routes) {
@@ -20,6 +37,8 @@ $routes->post('check', 'Auth::check');
 $routes->post('logout', 'Auth::logout');
 
 $routes->get('search', 'SearchController::index');
+
+$routes->post('roles/updatePermissions', 'RoleController::updatePermissions');
 
 // Rutas para las canciones
 $routes->get('songs', 'SongController::index');
@@ -33,16 +52,13 @@ $routes->delete('songs/(:num)', 'SongController::delete/$1');
 $routes->post('comments', 'CommentController::create');
 $routes->delete('comments/(:num)', 'CommentController::delete/$1');
 
-// Rutas API Rest Songs
-$routes->post('api/v1/auth/login', ['controller' => 'Api\AuthController::login']);
-$routes->resource('api/v1/songs', ['controller' => 'Api\SongController']);
-
 // Rutas para artistas
 $routes->get('artists', 'ArtistController::index');
 $routes->get('artists/(:num)', 'ArtistController::show/$1');
 $routes->get('getartists', 'ArtistController::getArtists');
 
 // Rutas para los usuarios
-$routes->post('promote', 'UserController::promote');
+$routes->post('updaterole/(:num)', 'UserController::updateRole/$1');
+$routes->post('moderate/(:num)', 'UserController::moderate/$1');
 // $routes->get('users/(:num)', 'UserController::show/$1');
 $routes->get('user/(:segment)', 'UserController::show/$1');

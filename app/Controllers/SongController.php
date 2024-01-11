@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\ActivityModel;
+use App\Models\AdditionalCreditArtistModel;
 use App\Models\ArtistModel;
 use App\Models\CommentModel;
 use App\Models\SongArtistModel;
@@ -13,6 +14,7 @@ use App\Models\UserModel;
 class SongController extends BaseController
 {
     protected $activityModel;
+    protected $additionalCreditArtistModel;
     protected $artistModel;
     protected $commentModel;
     protected $songModel;
@@ -21,12 +23,13 @@ class SongController extends BaseController
 
     public function __construct()
     {
-        $this->activityModel   = new ActivityModel();
-        $this->artistModel     = new ArtistModel();
-        $this->commentModel    = new CommentModel();
-        $this->songModel       = new SongModel();
-        $this->songArtistModel = new SongArtistModel();
-        $this->userModel       = new UserModel();
+        $this->activityModel               = new ActivityModel();
+        $this->additionalCreditArtistModel = new AdditionalCreditArtistModel();
+        $this->artistModel                 = new ArtistModel();
+        $this->commentModel                = new CommentModel();
+        $this->songModel                   = new SongModel();
+        $this->songArtistModel             = new SongArtistModel();
+        $this->userModel                   = new UserModel();
 
         helper(['url', 'form', 'date']);
     }
@@ -37,10 +40,11 @@ class SongController extends BaseController
 
         // Obtén todas las canciones con sus artistas asociados
         $songs = $this->songModel
-            ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
+            ->select('songs.song_id, songs.song_artwork, songs.song_title, songs.song_views, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
             ->join('artists', 'artists.artist_id = song_artists.id_artist')
             ->groupBy('songs.song_id')
+            ->orderBy('songs.song_views', 'DESC')
             ->findAll();
 
         $data = [
@@ -73,6 +77,28 @@ class SongController extends BaseController
                 ->orderBy('sa_position', 'ASC')
                 ->findAll();
 
+            // $featuringArtists = $this->additionalCreditArtistModel
+            //     ->select('song_additional_credits.*, artists.artist_name')
+            //     ->join('additional_credits', 'additional_credits.artist_id = song_additional_credits.id_artist')
+            //     ->join('artists', 'artists.artist_id = song_additional_credits.id_artist')
+            //     ->where('id_song', $id)
+            //     ->orderBy('sac_position', 'ASC')
+            //     ->findAll();
+
+            // $writerArtists = $this->additionalCreditArtistModel
+            //     ->select('song_artists.*, artists.artist_name')
+            //     ->join('artists', 'artists.artist_id = song_artists.id_artist')
+            //     ->where('id_song', $id)
+            //     ->orderBy('sa_position', 'ASC')
+            //     ->findAll();
+
+            // $producerArtists = $this->additionalCreditArtistModel
+            //     ->select('song_artists.*, artists.artist_name')
+            //     ->join('artists', 'artists.artist_id = song_artists.id_artist')
+            //     ->where('id_song', $id)
+            //     ->orderBy('sa_position', 'ASC')
+            //     ->findAll();
+
             $comments = $this->commentModel->getCommentsBySong($id);
 
             $activities = $this->activityModel
@@ -85,7 +111,7 @@ class SongController extends BaseController
 
             $artistNames = implode(', ', array_column($songArtists, 'artist_name'));
 
-            $title = "{$song['song_title']} lyrics - Lyrics Case";
+            $title = "{$song['song_title']} - lyrics by {$artistNames} on Lyrics Case";
 
             $data = [
                 'title'          => $title,

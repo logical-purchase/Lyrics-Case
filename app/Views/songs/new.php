@@ -73,4 +73,48 @@
     </form>
 </div>
 
+<!-- SELECT ARTISTS -->
+<script>
+    $(document).ready(function() {
+        $('#artistSelect').select2({
+            theme: 'bootstrap-5',
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            tags: true,
+            minimumInputLength: 2,
+            ajax: {
+                url: '<?= base_url('getartists'); ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        q: params.term,
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+            },
+            insertTag: function(data, tag) {
+                data.push(tag);
+            },
+            templateResult: formatArtist,
+            placeholder: "Search the primary artist"
+        });
+
+        function formatArtist(artist) {
+            var $result = $(
+                '<span>' +
+                (artist.image ? '<img class="artist-image rounded-circle me-2" src="' + artist.image + '" width="30px" />' : '') +
+                artist.text +
+                '</span>'
+            );
+
+            return $result;
+        }
+    });
+</script>
+
 <?= $this->endSection(); ?>

@@ -4,24 +4,15 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class UserModel extends Model
+class PermissionModel extends Model
 {
-    protected $table            = 'users';
-    protected $primaryKey       = 'user_id';
+    protected $table            = 'permissions';
+    protected $primaryKey       = 'permission_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [
-        'username',
-        'user_email',
-        'user_password',
-        'user_image',
-        'user_bio',
-        'user_points',
-        'user_status',
-        'id_role'
-    ];
+    protected $allowedFields    = ['permission_name'];
 
     // Dates
     protected $useTimestamps = false;
@@ -46,11 +37,4 @@ class UserModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
-    public function searchUser($query)
-    {
-        return $this->select('user_id, username, user_image')
-            ->like('username', $query)
-            ->findAll();
-    }
 }

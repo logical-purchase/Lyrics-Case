@@ -14,7 +14,7 @@ class Home extends BaseController
         $userInfo = $userModel->find($loggedUserId);
 
         $songs = $songModel
-            ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
+            ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
             ->join('artists', 'artists.artist_id = song_artists.id_artist')
             ->groupBy('songs.song_id')
@@ -26,5 +26,19 @@ class Home extends BaseController
             'songs'    => $songs
         ];
         return view('songs/index', $data);
+    }
+
+    public function test()
+    {
+        $userModel = new UserModel();
+        $loggedUserId = session()->get('loggedUser');
+        $userInfo = $userModel->find($loggedUserId);
+
+        $data = [
+            'title'    => 'Test page - Lyrics Case',
+            'userInfo' => $userInfo
+        ];
+
+        return view('test', $data);
     }
 }

@@ -4,15 +4,15 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class UserRoleModel extends Model
+class AdditionalCreditArtistModel extends Model
 {
-    protected $table            = 'user_roles';
-    protected $primaryKey       = 'ur_id';
+    protected $table            = 'additional_credit_artists';
+    protected $primaryKey       = 'aca_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['id_user', 'id_role', 'ur_granter'];
+    protected $allowedFields    = ['id_ac', 'id_artist', 'aca_position'];
 
     // Dates
     protected $useTimestamps = false;

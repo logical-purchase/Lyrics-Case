@@ -4,6 +4,7 @@ namespace Config;
 
 use App\Filters\AlreadyLoggedInFilter;
 use App\Filters\AuthCheckFilter;
+use App\Filters\AuthFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
@@ -22,13 +23,14 @@ class Filters extends BaseConfig
      * @phpstan-var array<string, class-string|list<class-string>>
      */
     public array $aliases = [
-        'csrf'          => CSRF::class,
-        'toolbar'       => DebugToolbar::class,
-        'honeypot'      => Honeypot::class,
-        'invalidchars'  => InvalidChars::class,
-        'secureheaders' => SecureHeaders::class,
+        'csrf'            => CSRF::class,
+        'toolbar'         => DebugToolbar::class,
+        'honeypot'        => Honeypot::class,
+        'invalidchars'    => InvalidChars::class,
+        'secureheaders'   => SecureHeaders::class,
         'AuthCheck'       => AuthCheckFilter::class,
         'AlreadyLoggedIn' => AlreadyLoggedInFilter::class,
+        'AuthFilter'      => AuthFilter::class
     ];
 
     /**
