@@ -10,7 +10,7 @@ class AuthCheckFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        if (!session()->has('loggedUser')) {
+        if (!session()->has('_logged_user_id')) {
             return redirect()->to('login');
         }
     }

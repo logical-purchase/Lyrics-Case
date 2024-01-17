@@ -36,9 +36,8 @@ class SongController extends BaseController
 
     public function index()
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
-        // Obtén todas las canciones con sus artistas asociados
         $songs = $this->songModel
             ->select('songs.song_id, songs.song_artwork, songs.song_title, songs.song_views, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
@@ -48,9 +47,9 @@ class SongController extends BaseController
             ->findAll();
 
         $data = [
-            'title'    => 'Song catalogue | Lyrics Case',
-            'userInfo' => $userInfo,
-            'songs'    => $songs,
+            'title'       => 'Song catalogue - Lyrics Case',
+            'songs'       => $songs,
+            'loggedUser' => $loggedUser
         ];
 
         return view('songs/index', $data);
@@ -58,7 +57,7 @@ class SongController extends BaseController
 
     public function show($id = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $song = $this->songModel->find($id);
 
@@ -115,13 +114,13 @@ class SongController extends BaseController
 
             $data = [
                 'title'          => $title,
-                'userInfo'       => $userInfo,
                 'song'           => $song,
                 'songArtists'    => $songArtists,
                 'comments'       => $comments,
                 'activities'     => $activities,
                 'formattedViews' => $formattedViews,
-                'videoId'        => $videoId
+                'videoId'        => $videoId,
+                'loggedUser'     => $loggedUser,
             ];
 
             return view('songs/show', $data);
@@ -132,11 +131,11 @@ class SongController extends BaseController
 
     public function new()
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $data = [
-            'title'    => 'Add song | Lyrics',
-            'userInfo' => $userInfo
+            'title'      => 'Add a song - Lyrics Case',
+            'loggedUser' => $loggedUser
         ];
 
         return view('songs/new', $data);
@@ -153,7 +152,7 @@ class SongController extends BaseController
     // }
     public function create()
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $title   = $this->request->getPost('title');
         $lyrics  = $this->request->getPost('lyrics');
@@ -208,7 +207,7 @@ class SongController extends BaseController
                 $this->songArtistModel->insertBatch($songArtists);
             }
 
-            $this->logActivity('created', $userInfo['user_id'], $lastId);
+            $this->logActivity('created', $loggedUser['user_id'], $lastId);
 
             session()->setFlashdata('success', 'Song created successfully');
             return redirect()->to("/songs/$lastId");
@@ -217,7 +216,7 @@ class SongController extends BaseController
 
     public function updateLyrics($id = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $lyrics = $this->request->getPost('lyrics');
         $cleanLyrics = htmlspecialchars($lyrics, ENT_QUOTES, 'UTF-8');
@@ -225,7 +224,7 @@ class SongController extends BaseController
         $result = $this->songModel->update($id, $data);
 
         if ($result) {
-            $this->logActivity('edited the lyrics of', $userInfo['user_id'], $id);
+            $this->logActivity('edited the lyrics of', $loggedUser['user_id'], $id);
             session()->setFlashdata('success', 'Lyrics updated successfully');
         } else {
             session()->setFlashdata('fail', 'Failed to update lyrics');
@@ -236,7 +235,7 @@ class SongController extends BaseController
 
     public function updateMetadata($id = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $title   = $this->request->getPost('title');
         $artwork = $this->request->getPost('artwork');
@@ -284,7 +283,7 @@ class SongController extends BaseController
                 $this->songArtistModel->insertBatch($songArtists);
             }
 
-            $this->logActivity('edited the metadata of', $userInfo['user_id'], $id);
+            $this->logActivity('edited the metadata of', $loggedUser['user_id'], $id);
             session()->setFlashdata('success', 'Metadata updated successfully');
         } else {
             session()->setFlashdata('fail', 'Failed to update metadata');
@@ -295,7 +294,7 @@ class SongController extends BaseController
 
     public function delete($id = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         // Verifica si se proporciona un ID de canción válido
         if (!$id) {
@@ -306,17 +305,11 @@ class SongController extends BaseController
         $this->songModel->delete($id);
 
         // Registrar la actividad
-        $this->logActivity('deleted a song', $userInfo['user_id']);
+        $this->logActivity('deleted a song', $loggedUser['user_id']);
 
         // Redirigir a la página de inicio con un mensaje de éxito
         session()->setFlashdata('success', 'Song deleted successfully');
         return redirect()->to('/songs');
-    }
-
-    private function getLoggedUserInfo()
-    {
-        $loggedUserId = session()->get('loggedUser');
-        return $this->userModel->find($loggedUserId);
     }
 
     private function logActivity($description, $userId, $songId = null)

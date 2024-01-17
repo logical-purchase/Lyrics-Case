@@ -92,8 +92,8 @@ class Auth extends BaseController
                 return redirect()->back()->with('fail', 'Something went wrong');
             } else {
                 $lastId = $this->userModel->getInsertID();
-                session()->set('loggedUser', $lastId);
-                return redirect()->to('/songs');
+                session()->set('_logged_user_id', $lastId);
+                return redirect()->to('/');
             }
         }
     }
@@ -137,17 +137,17 @@ class Auth extends BaseController
                 return redirect()->to('/login')->withInput();
             } else {
                 $userId = $userInfo['user_id'];
-                session()->set('loggedUser', $userId);
-                return redirect()->to('/songs');
+                session()->set('_logged_user_id', $userId);
+                return redirect()->to('/');
             }
         }
     }
 
     function logout()
     {
-        if (session()->has('loggedUser')) {
+        if (session()->has('_logged_user_id')) {
             $redirectUrl = $this->request->getPost('redirect_url');
-            session()->remove('loggedUser');
+            session()->remove('_logged_user_id');
             return redirect()->to($redirectUrl);
         }
     }

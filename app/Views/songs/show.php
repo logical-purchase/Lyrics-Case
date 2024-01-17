@@ -326,6 +326,24 @@
     </div>
 </div>
 
+<!-- ACTIVAR BOTÓN MODAL LETRAS -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lyricsTextarea = document.getElementById('lyricsTextarea');
+        var saveLyricsButton = document.getElementById('saveLyricsButton');
+
+        var initialLyricsValue = lyricsTextarea.value;
+
+        function checkLyricsChanges() {
+            var lyricsChanged = lyricsTextarea.value !== initialLyricsValue;
+
+            saveLyricsButton.disabled = !lyricsChanged;
+        }
+
+        lyricsTextarea.addEventListener('input', checkLyricsChanges);
+    });
+</script>
+
 <!-- SELECT ARTISTS -->
 <script>
     $(document).ready(function() {
@@ -451,6 +469,24 @@
 
             return $result;
         }
+    });
+</script>
+
+<!-- ACTUALIZAR PREVIEW DEL ARTWORK -->
+<script>
+    function updateArtworkPreview() {
+        // Obtiene la URL del campo de entrada
+        var artworkUrl = document.getElementById('artworkInput').value;
+
+        // Actualiza la vista previa de la imagen
+        var artworkPreview = document.getElementById('artworkPreview');
+        artworkPreview.src = artworkUrl;
+    }
+
+    // Agrega el evento onpaste al campo de entrada
+    document.getElementById('artworkInput').addEventListener('paste', function(event) {
+        // Espera un breve momento para que el valor se actualice después de pegar
+        setTimeout(updateArtworkPreview, 100);
     });
 </script>
 

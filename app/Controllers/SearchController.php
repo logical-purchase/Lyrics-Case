@@ -29,8 +29,7 @@ class SearchController extends BaseController
             return redirect()->to('/');
         }
 
-        $loggedUserId = session()->get('loggedUser');
-        $userInfo = $this->userModel->find($loggedUserId);
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $songResults = $this->songModel->searchSong($query);
         $artistResults = $this->artistModel->searchArtist($query);
@@ -41,12 +40,12 @@ class SearchController extends BaseController
         }
 
         $data = [
-            'title'    => 'Search results | Lyrics Case',
-            'songResults'  => $songResults,
-            'artistResults'  => $artistResults,
-            'userResults'  => $userResults,
-            'userInfo' => $userInfo,
-            'query'    => $query,
+            'title'         => 'Search results - Lyrics Case',
+            'query'         => $query,
+            'songResults'   => $songResults,
+            'artistResults' => $artistResults,
+            'userResults'   => $userResults,
+            'loggedUser'    => $loggedUser
         ];
 
         return view('search/index', $data);

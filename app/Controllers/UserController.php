@@ -23,7 +23,7 @@ class UserController extends BaseController
 
     public function show($username = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $user = $this->userModel
             ->select('users.*, roles.role_name')
@@ -44,13 +44,13 @@ class UserController extends BaseController
                 ->orderBy('activity_created_at', 'DESC')
                 ->findAll();
 
-            $title = "@{$user['username']} - Lyrics Case";
+            $title = "@{$user['username']} - Lyrics Case stats and contributions";
             $data = [
                 'title'      => $title,
-                'userInfo'   => $userInfo,
                 'user'       => $user,
                 'roles'      => $roles,
-                'activities' => $activities
+                'activities' => $activities,
+                'loggedUser' => $loggedUser
             ];
 
             return view('users/show', $data);
@@ -75,11 +75,5 @@ class UserController extends BaseController
         $this->userModel->update($id, ['user_status' => $this->request->getPost('status')]);
 
         return redirect()->back()->with('success', 'Status updated successfully');
-    }
-
-    private function getLoggedUserInfo()
-    {
-        $loggedUserId = session()->get('loggedUser');
-        return $this->userModel->find($loggedUserId);
     }
 }

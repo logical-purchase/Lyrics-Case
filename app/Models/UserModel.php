@@ -47,6 +47,15 @@ class UserModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
+    public function getUserInfoByLoggedId()
+    {
+        $loggedUserId = session()->get('_logged_user_id');
+
+        $result = $loggedUserId ? $this->find($loggedUserId) : null;
+
+        return $result;
+    }
+
     public function searchUser($query)
     {
         return $this->select('user_id, username, user_image')

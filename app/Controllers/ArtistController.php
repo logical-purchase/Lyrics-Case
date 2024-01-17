@@ -13,10 +13,8 @@ class ArtistController extends BaseController
 
     public function __construct()
     {
-        $this->artistModel     = new ArtistModel();
-        $this->userModel       = new UserModel();
-
-        helper(['url', 'form', 'date']);
+        $this->artistModel = new ArtistModel();
+        $this->userModel   = new UserModel();
     }
 
     public function index()
@@ -25,7 +23,7 @@ class ArtistController extends BaseController
 
     public function show($id = null)
     {
-        $userInfo = $this->getLoggedUserInfo();
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $artist = $this->artistModel->find($id);
 
@@ -34,13 +32,13 @@ class ArtistController extends BaseController
             $title = "{$artist['artist_name']} on Lyrics Case";
             $data = [
                 'title'      => $title,
-                'userInfo'   => $userInfo,
-                'artist'       => $artist,
+                'artist'     => $artist,
+                'loggedUser' => $loggedUser
             ];
 
             return view('artists/show', $data);
         } else {
-            return redirect()->to('/')->with('fail', 'Song not found');
+            return redirect()->to('/')->with('fail', 'Artist not found');
         }
     }
 
@@ -60,11 +58,5 @@ class ArtistController extends BaseController
         }
 
         return $this->response->setJSON($data);
-    }
-
-    private function getLoggedUserInfo()
-    {
-        $loggedUserId = session()->get('loggedUser');
-        return $this->userModel->find($loggedUserId);
     }
 }

@@ -6,14 +6,20 @@ use App\Models\UserModel;
 
 class Home extends BaseController
 {
+    protected $songModel;
+    protected $userModel;
+
+    public function __construct()
+    {
+        $this->songModel = new SongModel();
+        $this->userModel = new UserModel();
+    }
+
     public function index()
     {
-        $songModel = new SongModel();
-        $userModel = new UserModel();
-        $loggedUserId = session()->get('loggedUser');
-        $userInfo = $userModel->find($loggedUserId);
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
-        $songs = $songModel
+        $songs = $this->songModel
             ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
             ->join('artists', 'artists.artist_id = song_artists.id_artist')
@@ -21,22 +27,21 @@ class Home extends BaseController
             ->findAll();
         
         $data = [
-            'title'    => 'Lyrics Case',
-            'userInfo' => $userInfo,
-            'songs'    => $songs
+            'title'      => 'Lyrics Case',
+            'songs'      => $songs,
+            'loggedUser' => $loggedUser
         ];
+
         return view('songs/index', $data);
     }
 
     public function test()
     {
-        $userModel = new UserModel();
-        $loggedUserId = session()->get('loggedUser');
-        $userInfo = $userModel->find($loggedUserId);
+        $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $data = [
-            'title'    => 'Test page - Lyrics Case',
-            'userInfo' => $userInfo
+            'title'      => 'Test page',
+            'loggedUser' => $loggedUser
         ];
 
         return view('test', $data);
