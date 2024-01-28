@@ -42,20 +42,20 @@ $routes->post('roles/updatePermissions', 'RoleController::updatePermissions');
 
 // Rutas para las canciones
 $routes->get('songs', 'SongController::index');
-$routes->get('songs/(:num)', 'SongController::show/$1');
+$routes->get('song/(:segment)', 'SongController::show/$1');
 $routes->post('songs', 'SongController::create');
 $routes->put('updateLyrics/(:num)', 'SongController::updateLyrics/$1');
 $routes->put('updateMetadata/(:num)', 'SongController::updateMetadata/$1');
 $routes->delete('songs/(:num)', 'SongController::delete/$1');
 
+// Rutas para artistas
+$routes->get('artists', 'ArtistController::index');
+$routes->get('artist/(:segment)', 'ArtistController::show/$1');
+$routes->get('getartists', 'ArtistController::getArtists');
+
 // Rutas para comentarios
 $routes->post('comments', 'CommentController::create');
 $routes->delete('comments/(:num)', 'CommentController::delete/$1');
-
-// Rutas para artistas
-$routes->get('artists', 'ArtistController::index');
-$routes->get('artists/(:num)', 'ArtistController::show/$1');
-$routes->get('getartists', 'ArtistController::getArtists');
 
 // Rutas para los usuarios
 $routes->post('updaterole/(:num)', 'UserController::updateRole/$1');

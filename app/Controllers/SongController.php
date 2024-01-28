@@ -31,7 +31,7 @@ class SongController extends BaseController
         $this->songArtistModel             = new SongArtistModel();
         $this->userModel                   = new UserModel();
 
-        helper(['url', 'form', 'date']);
+        helper(['uuid_helper', 'form']);
     }
 
     public function index()
@@ -39,7 +39,7 @@ class SongController extends BaseController
         $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $songs = $this->songModel
-            ->select('songs.song_id, songs.song_artwork, songs.song_title, songs.song_views, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
+            ->select('songs.song_uuid, songs.song_artwork, songs.song_title, songs.song_views, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
             ->join('artists', 'artists.artist_id = song_artists.id_artist')
             ->groupBy('songs.song_id')
@@ -55,13 +55,14 @@ class SongController extends BaseController
         return view('songs/index', $data);
     }
 
-    public function show($id = null)
+    public function show($uuid = null)
     {
         $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
-        $song = $this->songModel->find($id);
+        $song = $this->songModel->select()->where('song_uuid', $uuid)->first();
 
         if ($song) {
+            $id = $song['song_id'];
             $currentViews = $song['song_views'];
             $newViews = $currentViews + 1;
             $this->songModel->update($id, ['song_views' => $newViews]);
@@ -70,7 +71,7 @@ class SongController extends BaseController
             $videoId = $this->getYoutubeVideoId($videoLink);
 
             $songArtists = $this->songArtistModel
-                ->select('song_artists.*, artists.artist_name')
+                ->select('song_artists.id_artist, artists.artist_uuid, artists.artist_name')
                 ->join('artists', 'artists.artist_id = song_artists.id_artist')
                 ->where('id_song', $id)
                 ->orderBy('sa_position', 'ASC')
@@ -154,6 +155,7 @@ class SongController extends BaseController
     {
         $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
+        $uuid    = generateUuid();
         $title   = $this->request->getPost('title');
         $lyrics  = $this->request->getPost('lyrics');
         $artwork = $this->request->getPost('artwork');
@@ -165,6 +167,7 @@ class SongController extends BaseController
         $selectedArtists = $this->request->getPost('artist');
 
         $values = [
+            'song_uuid'       => $uuid,
             'song_title'      => $title,
             'song_lyrics'     => $lyrics,
             'song_artwork'    => $artwork,
@@ -180,6 +183,9 @@ class SongController extends BaseController
         } else {
             $lastId = $this->songModel->getInsertID();
 
+            $lastSong = $this->songModel->select('song_uuid')->where('song_id', $lastId)->first();
+            $lastUuid = $lastSong['song_uuid'];
+
             if (!empty($selectedArtists)) {
                 $songArtists = [];
                 $position = 1;
@@ -187,16 +193,16 @@ class SongController extends BaseController
                 foreach ($selectedArtists as $artist) {
                     if (is_numeric($artist)) {
                         $songArtists[] = [
-                            'id_song' => $lastId,
-                            'id_artist' => $artist,
+                            'id_song'     => $lastId,
+                            'id_artist'   => $artist,
                             'sa_position' => $position,
                         ];
                     } else {
                         $newArtistId = $this->createArtist($artist);
                         if ($newArtistId) {
                             $songArtists[] = [
-                                'id_song' => $lastId,
-                                'id_artist' => $newArtistId,
+                                'id_song'     => $lastId,
+                                'id_artist'   => $newArtistId,
                                 'sa_position' => $position,
                             ];
                         }
@@ -210,7 +216,7 @@ class SongController extends BaseController
             $this->logActivity('created', $loggedUser['user_id'], $lastId);
 
             session()->setFlashdata('success', 'Song created successfully');
-            return redirect()->to("/songs/$lastId");
+            return redirect()->to("song/$lastUuid");
         }
     }
 
@@ -324,8 +330,11 @@ class SongController extends BaseController
 
     protected function createArtist($artistName)
     {
+        $artistUuid = generateUuid();
+
         $newArtistData = [
-            'artist_name' => $artistName,
+            'artist_uuid' => $artistUuid,
+            'artist_name' => $artistName
         ];
 
         $this->artistModel->insert($newArtistData);

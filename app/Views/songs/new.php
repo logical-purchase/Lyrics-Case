@@ -117,4 +117,22 @@
     });
 </script>
 
+<!-- ACTUALIZAR PREVIEW DEL ARTWORK -->
+<script>
+    function updateArtworkPreview() {
+        // Obtiene la URL del campo de entrada
+        var artworkUrl = document.getElementById('artworkInput').value;
+
+        // Actualiza la vista previa de la imagen
+        var artworkPreview = document.getElementById('artworkPreview');
+        artworkPreview.src = artworkUrl;
+    }
+
+    // Agrega el evento onpaste al campo de entrada
+    document.getElementById('artworkInput').addEventListener('paste', function(event) {
+        // Espera un breve momento para que el valor se actualice después de pegar
+        setTimeout(updateArtworkPreview, 100);
+    });
+</script>
+
 <?= $this->endSection(); ?>

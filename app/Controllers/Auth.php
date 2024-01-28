@@ -14,7 +14,7 @@ class Auth extends BaseController
     {
         $this->userModel = new UserModel();
 
-        helper(['url', 'form']);
+        helper(['uuid_helper', 'form']);
     }
 
     public function index()
@@ -78,10 +78,12 @@ class Auth extends BaseController
         if (!$validation) {
             return view('auth/signup', ['validation' => $this->validator]);
         } else {
+            $uuid     = generateUuid();
             $username = $this->request->getPost('username');
             $email    = $this->request->getPost('email');
             $password = $this->request->getPost('password');
             $values = [
+                'user_uuid'     => $uuid,
                 'username'      => $username,
                 'user_email'    => $email,
                 'user_password' => Hash::make($password)

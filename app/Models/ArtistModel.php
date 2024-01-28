@@ -13,6 +13,7 @@ class ArtistModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'artist_uuid',
         'artist_name',
         'artist_disambiguation',
         'artist_bio',
@@ -49,7 +50,7 @@ class ArtistModel extends Model
 
     public function searchArtist($query)
     {
-        return $this->select('artist_id, artist_name, artist_image')
+        return $this->select('artist_uuid, artist_name, artist_image')
             ->like('artist_name', $query)
             ->findAll();
     }
