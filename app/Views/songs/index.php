@@ -4,7 +4,7 @@
 
 <div class="container mt-4 mb-2">
     <?php foreach ($songs as $song) : ?>
-        <a class="link-body-emphasis text-decoration-none" href="<?= base_url('songs/' . esc($song['song_id'])); ?>">
+        <a class="link-body-emphasis text-decoration-none" href="<?= base_url('song/' . esc($song['song_uuid'])); ?>">
             <div class="song-item d-flex bg-body text-truncate rounded-3 shadow-sm mb-3">
                 <div class="row g-0 w-100">
                     <div class="col-auto p-2">

@@ -13,6 +13,7 @@ class UserModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'user_uuid',
         'username',
         'user_email',
         'user_password',
@@ -46,7 +47,7 @@ class UserModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
-
+    
     public function getUserInfoByLoggedId()
     {
         $loggedUserId = session()->get('_logged_user_id');

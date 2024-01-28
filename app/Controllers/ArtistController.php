@@ -21,11 +21,11 @@ class ArtistController extends BaseController
     {
     }
 
-    public function show($id = null)
+    public function show($uuid = null)
     {
         $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
-        $artist = $this->artistModel->find($id);
+        $artist = $this->artistModel->select()->where('artist_uuid', $uuid)->first();
 
         if ($artist) {
 

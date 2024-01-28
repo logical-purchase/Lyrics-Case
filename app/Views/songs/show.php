@@ -2,12 +2,6 @@
 
 <?= $this->section('content'); ?>
 
-<?php
-// var_dump($userInfo);
-// var_dump($song);
-// var_dump($videoId);
-// var_dump($comments);
-?>
 <div class="container">
     <div class="bg-body rounded-3 shadow-sm mt-4 mb-3 p-4">
         <div class="row">
@@ -20,7 +14,7 @@
                     <?php
                     $artistLinks = [];
                     foreach ($songArtists as $artist) {
-                        $artistLinks[] = '<a class="link-primary link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="' . base_url("artists/{$artist['id_artist']}") . '">' . esc($artist['artist_name']) . '</a>';
+                        $artistLinks[] = '<a class="link-primary link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="' . base_url("artist/{$artist['artist_uuid']}") . '">' . esc($artist['artist_name']) . '</a>';
                     }
                     $artistsString = implode(', ', $artistLinks);
                     ?>
@@ -58,7 +52,7 @@
                 <small>
                     <span class="me-4"><span class="me-1"><?= $song['song_title']; ?></span>lyrics</span>
                 </small>
-                <?php if (session()->has('loggedUser')) : ?>
+                <?php if (session()->has('_logged_user_id')) : ?>
                     <button class="btn btn-primary btn-sm fw-medium me-2" data-bs-toggle="modal" data-bs-target="#lyricsModal">Edit lyrics</button>
                     <button class="btn btn-primary btn-sm fw-medium me-2" data-bs-toggle="modal" data-bs-target="#creditsModal">Edit metadata</button>
                     <div class="dropdown">
@@ -100,8 +94,8 @@
         <div class="col-lg-7">
             <h1 class="text-center">Comments</h1>
             <div class="d-flex mt-5 mb-4 px-4">
-                <?php if (session()->has('loggedUser')) : ?>
-                    <img class="rounded-circle me-3" src="<?= esc($userInfo['user_image']); ?>" width="40px" height="40px">
+                <?php if (session()->has('_logged_user_id')) : ?>
+                    <img class="rounded-circle me-3" src="<?= esc($loggedUser['user_image']); ?>" width="40px" height="40px">
                     <form class="w-100" action="<?= base_url('comments'); ?>" method="post" id="commentForm" autocomplete="off">
                         <input type="hidden" name="songId" value="<?= esc($song['song_id']) ?>">
                         <textarea class="form-control rounded-4 border-0" name="comment" id="commentInput" rows="4" placeholder="Add a comment" style="resize: none; height: fit-content;"></textarea>
@@ -133,7 +127,7 @@
                             <button class="btn p-0"><i class="bi bi-hand-thumbs-up"></i></button>
                             <span class="mx-3">13</span>
                             <button class="btn p-0"><i class="bi bi-hand-thumbs-down"></i></button>
-                            <?php if (session()->has('loggedUser') && $userInfo['user_id'] === $comment['id_user']) : ?>
+                            <?php if (session()->has('_logged_user_id') && $loggedUser['user_id'] === $comment['id_user']) : ?>
                                 <button class="btn ms-auto p-0"><i class="bi bi-trash"></i></button>
                             <?php endif ?>
                         </div>

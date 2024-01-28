@@ -20,10 +20,11 @@ class Home extends BaseController
         $loggedUser = $this->userModel->getUserInfoByLoggedId();
 
         $songs = $this->songModel
-            ->select('songs.song_id, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
+            ->select('songs.song_uuid, songs.song_artwork, songs.song_title, GROUP_CONCAT(artists.artist_name SEPARATOR \', \') as artist_names, songs.song_views')
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
             ->join('artists', 'artists.artist_id = song_artists.id_artist')
             ->groupBy('songs.song_id')
+            ->orderBy('songs.song_views', 'DESC')
             ->findAll();
         
         $data = [

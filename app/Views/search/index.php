@@ -28,7 +28,7 @@
                 <div class="col-lg-7">
                     <span class="h6 text-info-emphasis text-uppercase">Songs</span>
                     <?php foreach ($songResults as $songResult) : ?>
-                        <a href="<?= base_url('songs/' . $songResult['song_id']); ?>" class="text-primary-emphasis text-decoration-none">
+                        <a href="<?= base_url('song/' . $songResult['song_uuid']); ?>" class="text-primary-emphasis text-decoration-none">
                             <div class="song-item d-flex bg-body text-truncate rounded-3 shadow-sm my-2">
                                 <div class="row g-0 w-100">
                                     <div class="col-auto p-2">
@@ -65,7 +65,7 @@
                 <div class="col">
                     <span class="h6 text-info-emphasis text-uppercase">Artists</span>
                     <?php foreach ($artistResults as $artistResult) : ?>
-                        <a href="<?= base_url('artists/' . $artistResult['artist_id']); ?>" class="text-primary-emphasis text-decoration-none">
+                        <a href="<?= base_url('artist/' . $artistResult['artist_uuid']); ?>" class="text-primary-emphasis text-decoration-none">
                             <div class="d-flex align-items-center bg-body rounded-3 shadow-sm my-2 p-2">
                                 <img class="rounded-circle" src="<?= $artistResult['artist_image']; ?>" width="65px" height="65px">
                                 <small>

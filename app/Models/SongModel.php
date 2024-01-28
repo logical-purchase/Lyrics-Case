@@ -13,6 +13,7 @@ class SongModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'song_uuid',
         'song_title',
         'song_lyrics',
         'song_artwork',
@@ -48,7 +49,7 @@ class SongModel extends Model
 
     public function searchSong($query)
     {
-        $matchingSongs = $this->select('songs.song_id, songs.song_title, songs.song_artwork, songs.song_views')
+        $matchingSongs = $this->select('songs.song_id, songs.song_uuid, songs.song_title, songs.song_artwork, songs.song_views')
             ->like('songs.song_title', $query)
             ->orLike('artists.artist_name', $query)
             ->join('song_artists', 'song_artists.id_song = songs.song_id')
