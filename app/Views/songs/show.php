@@ -3,92 +3,108 @@
 <?= $this->section('content'); ?>
 
 <div class="container">
-    <div class="bg-body rounded-3 shadow-sm mt-4 mb-3 p-4">
-        <div class="row">
-            <div class="col-auto">
-                <img src="<?= $song['song_artwork']; ?>" width="200px" class="rounded-3">
+    <div class="row g-0 mt-4 mb-3">
+        <div class="col-auto">
+            <img src="<?= $song['song_artwork']; ?>" width="200px" height="200px" class="rounded-3 shadow">
+        </div>
+        <div class="col text-truncate d-flex flex-column ms-4">
+            <div class="d-flex flex-column justify-content-center h-100">
+                <h4 class="fw-bold text-truncate"><?= $song['song_title']; ?></h4>
+                <?php
+                $artistLinks = [];
+                foreach ($songArtists as $artist) {
+                    $artistLinks[] = '<a class="link-primary link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="' . base_url("artist/{$artist['artist_uuid']}") . '">' . esc($artist['artist_name']) . '</a>';
+                }
+                $artistsString = implode(', ', $artistLinks);
+                ?>
+                <span class="fs-5 text-primary text-truncate mb-1"><?= $artistsString; ?></span>
             </div>
-            <div class="col">
-                <div class="d-flex flex-column h-100">
-                    <h2 class="fw-bold"><?= $song['song_title']; ?></h2>
-                    <?php
-                    $artistLinks = [];
-                    foreach ($songArtists as $artist) {
-                        $artistLinks[] = '<a class="link-primary link-underline link-underline-opacity-0 link-underline-opacity-75-hover" href="' . base_url("artist/{$artist['artist_uuid']}") . '">' . esc($artist['artist_name']) . '</a>';
-                    }
-                    $artistsString = implode(', ', $artistLinks);
-                    ?>
-                    <h5 class="text-primary fw-normal"><?= $artistsString; ?></h5>
+            <div class="d-flex">
+                <?php if (esc($song['song_date']) != '0000-00-00') : ?>
+                    <span class="me-3">
+                        <i class="bi bi-calendar4"></i>
+                        <?php
+                        $formattedDate = date_create($song['song_date'])->format('M. j, Y');
+                        echo $formattedDate;
+                        ?>
+                    </span>
+                <?php endif ?>
+                <span class="me-3">
+                    <i class="bi bi-eye"></i>
+                    <?= esc($formattedViews); ?> views
+                </span>
+                <span class="me-3">
+                    <a href="#" class="link-body-emphasis link-underline link-underline-opacity-0 link-underline-opacity-75-hover" data-bs-toggle="modal" data-bs-target="#historyModal">
+                        <i class="bi bi-people"></i>
+                        Contributions
+                    </a>
+                </span>
+                <?php if (session()->has('_logged_user_id')) : ?>
+                    <span class="d-flex">
+                        <div class="dropup-center dropup">
+                            <a href="#" class="link-body-emphasis link-underline link-underline-opacity-0 link-underline-opacity-75-hover dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-toggles"></i>
+                                Manage
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item fw-medium" href="#"><i class="bi bi-eye-slash me-2"></i>Hide</a></li>
+                                <li><a class="dropdown-item link-danger fw-medium" href="#" data-bs-toggle="modal" data-bs-target="#deleteSongModal"><i class="bi bi-x-lg me-2"></i>Delete</a></li>
+                            </ul>
+                        </div>
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
 
-                    <small class="mt-auto">
-                        <?php if (esc($song['song_date']) != '0000-00-00') : ?>
-                            <span class="me-2">
-                                <i class="bi bi-calendar4"></i>
-                                <?php
-                                $formattedDate = date_create($song['song_date'])->format('M. j, Y');
-                                echo $formattedDate;
-                                ?>
-                            </span>
-                        <?php endif ?>
-                        <span class="me-2">
-                            <i class="bi bi-eye"></i>
-                            <?= esc($formattedViews); ?> views
-                        </span>
-                        <a href="#" class="link-body-emphasis link-underline link-underline-opacity-0 link-underline-opacity-75-hover" data-bs-toggle="modal" data-bs-target="#historyModal">
-                            <i class="bi bi-people-fill me-1"></i>Contributions
-                        </a>
-                    </small>
+    <div class="row g-3">
+        <div class="col-8">
+            <div class="bg-body rounded-3 shadow-sm px-3 py-4">
+                <div class="d-flex align-items-center">
+                    <h5 class="fw-bold mb-0 me-1">Lyrics</h5>
+                    <?php if (session()->has('_logged_user_id')) : ?>
+                        <button class="btn px-2 py-0" data-bs-toggle="modal" data-bs-target="#lyricsModal">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    <?php endif; ?>
                 </div>
+                <p class="mb-0" style="white-space: pre-line;">
+                    <?= $song['song_lyrics']; ?>
+                </p>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="bg-body rounded-3 shadow-sm px-3 py-4">
+                <div class="song-info fw-medium mb-4">
+                    <div class="d-flex align-items-center">
+                        <h5 class="fw-bold mb-0 me-1">Info</h5>
+                        <?php if (session()->has('_logged_user_id')) : ?>
+                            <button class="btn px-2 py-0" data-bs-toggle="modal" data-bs-target="#creditsModal">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="row g-0 border-top mt-1">
+                        <?php if (esc($song['song_date']) != '0000-00-00') : ?>
+                            <div class="col-auto text-info-emphasis me-2">Release date</div>
+                            <?php $formattedDate = date_create($formattedDate)->format('F j, Y'); ?>
+                            <div class="col"><?php echo $formattedDate; ?></div>
+                        <?php endif ?>
+                    </div>
+                </div>
+                <?php if ($videoId) : ?>
+                    <h5 class="fw-bold me-3">Music video</h5>
+                    <div class="music-video d-flex flex-column border rounded-3 pt-2 pb-3 px-3">
+                        <iframe class="mt-2" src="https://www.youtube.com/embed/<?= esc($videoId) ?>" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+                <?php endif ?>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container px-4">
-
-    <div class="row bg-body rounded-3 shadow-sm mb-3">
-        <div class="col-lg-7 p-4 pb-0">
-            <div class="d-flex align-items-center">
-                <small>
-                    <span class="me-4"><span class="me-1"><?= $song['song_title']; ?></span>lyrics</span>
-                </small>
-                <?php if (session()->has('_logged_user_id')) : ?>
-                    <button class="btn btn-primary btn-sm fw-medium me-2" data-bs-toggle="modal" data-bs-target="#lyricsModal">Edit lyrics</button>
-                    <button class="btn btn-primary btn-sm fw-medium me-2" data-bs-toggle="modal" data-bs-target="#creditsModal">Edit metadata</button>
-                    <div class="dropdown">
-                        <a class="btn btn-primary btn-sm fw-medium dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-eye-slash me-2"></i>Hide</a></li>
-                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteSongModal"><i class="bi bi-x-lg me-2"></i>Delete</a></li>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-            </div>
-            <div style="white-space: pre-line;">
-                <p class="mb-0"><?= $song['song_lyrics']; ?></p>
-            </div>
-        </div>
-        <div class="col-lg-auto ms-lg-auto p-4">
-            <div class="song-info fw-medium mb-4">
-                <span class="text-uppercase">"<?= esc($song['song_title']); ?>" song info</span>
-                <div class="row g-0 border-top mt-1">
-                    <?php if (esc($song['song_date']) != '0000-00-00') : ?>
-                        <div class="col-auto text-info-emphasis me-2">Release date</div>
-                        <?php $formattedDate = date_create($formattedDate)->format('F j, Y'); ?>
-                        <div class="col"><?php echo $formattedDate; ?></div>
-                    <?php endif ?>
-                </div>
-            </div>
-            <?php if ($videoId) : ?>
-                <div class="music-video d-flex flex-column border rounded-3 pt-2 pb-3 px-3">
-                    <span>
-                        <small class="text-uppercase fw-medium">Music video</small>
-                    </span>
-                    <iframe class="mt-2" src="https://www.youtube.com/embed/<?= esc($videoId) ?>" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-                </div>
-            <?php endif ?>
-        </div>
-    </div>
 
     <div class="row my-5">
         <div class="col-lg-7">
@@ -169,14 +185,14 @@
         <div class="modal-content">
             <form action="<?= base_url('updateMetadata/' . $song['song_id']); ?>" method="post" autocomplete="off">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Edit metadata</h5>
+                    <h5 class="modal-title fw-bold">Edit info</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="_method" value="PUT">
 
                     <div class="title-artists-section mb-4">
-                        <h5 class="text-center fw-bold">Title & Artists</h5>
+                        <h5 class="text-center fw-bold">Title & Credits</h5>
                         <div class="row g-3 mb-3">
                             <div class="col-lg">
                                 <label for="titleInput" class="form-label fw-medium">Title<span class="text-danger ms-1">*</span></label>
